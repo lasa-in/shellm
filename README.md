@@ -27,9 +27,40 @@ Here are the Python files modified in the last 7 days:
 
 ## Quickstart
 
+### Option 1 — pipx (recommended, handles PATH automatically)
+
 ```bash
-pip install shellm
-export OPENAI_API_KEY=sk-...   # or ANTHROPIC_API_KEY / GEMINI_API_KEY
+pipx install git+https://github.com/lasa-in/shellm.git
+shellm
+```
+
+> Don't have pipx? `brew install pipx && pipx ensurepath` (Mac) or `pip install pipx` (Linux/Windows).
+
+### Option 2 — venv
+
+```bash
+python3 -m venv ~/shellm-env
+~/shellm-env/bin/pip install git+https://github.com/lasa-in/shellm.git
+
+# Make `shellm` available everywhere (Mac/Linux):
+ln -sf ~/shellm-env/bin/shellm /usr/local/bin/shellm
+```
+
+### Zero-config with Ollama (free, no API key)
+
+```bash
+# 1. Install Ollama: https://ollama.ai
+ollama pull llama3.1:8b   # 8B model handles tool-calling well
+# 2. Start Ollama (it runs as a background service)
+# 3. Just run shellm — it auto-detects Ollama:
+shellm
+#   🦙 Ollama detected — using ollama/llama3.1:8b (free, local)
+```
+
+### With a cloud API key
+
+```bash
+export OPENAI_API_KEY=sk-...        # or ANTHROPIC_API_KEY / GEMINI_API_KEY
 shellm
 ```
 
@@ -37,15 +68,7 @@ shellm
 
 ```bash
 shellm "show me disk usage for the current directory"
-shellm --model claude-3-5-sonnet-20241022 "find all TODO comments in this repo"
-```
-
-### Use a local model (no API key needed)
-
-```bash
-# Install Ollama from https://ollama.ai, then:
-ollama pull llama3
-shellm --model ollama/llama3
+shellm --model claude-sonnet-4-5 "find all TODO comments in this repo"
 ```
 
 ---
@@ -70,12 +93,14 @@ export SHELLM_MODEL=claude-3-5-sonnet-20241022
 
 ---
 
-## Installation from source
+## Install from source (for contributors)
 
 ```bash
 git clone https://github.com/lasa-in/shellm.git
 cd shellm
-pip install -e .
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest tests/ -v
 ```
 
 ---
