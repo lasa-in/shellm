@@ -9,11 +9,12 @@ Priority order:
 """
 
 import os
+from typing import Optional, Tuple
 from .ollama import detect_ollama, pick_ollama_model
 from ..config import load_config
 
 
-def resolve_model(model_flag: str | None) -> tuple[str, dict]:
+def resolve_model(model_flag: Optional[str]) -> Tuple[str, dict]:
     """
     Determine model string and extra kwargs for litellm.completion.
 

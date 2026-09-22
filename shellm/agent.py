@@ -1,6 +1,7 @@
 """Agent loop — sends messages to the LLM and handles tool calls."""
 
 import json
+from typing import Optional
 import litellm
 from .tools import ALL_TOOLS, run_bash, read_file, write_file, list_dir
 
@@ -15,10 +16,13 @@ TOOL_HANDLERS = {
 SYSTEM_PROMPT = """You are shellm, a terminal AI assistant with access to the user's local machine.
 You can run shell commands, read and write files, and help with coding, DevOps, and everyday terminal tasks.
 Always show the command you're about to run before executing it.
-Ask for confirmation before deleting files or making irreversible changes."""
+Ask for confirmation before deleting files or making irreversible changes.
+For simple questions that don't require file access or shell commands, answer directly without using tools."""
+
+MAX_TOOL_ITERATIONS = 15  # guard against runaway tool loops with smaller models
 
 
-def run_agent(prompt: str, model: str, history: list, extra_kwargs: dict | None = None) -> tuple[str, list]:
+def run_agent(prompt: str, model: str, history: list, extra_kwargs: Optional[dict] = None) -> tuple:
     """
     Run one turn of the agent loop.
     Returns the final text response and updated history.
@@ -27,8 +31,14 @@ def run_agent(prompt: str, model: str, history: list, extra_kwargs: dict | None 
     extra_kwargs = extra_kwargs or {}
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
+    iterations = 0
 
     while True:
+        if iterations >= MAX_TOOL_ITERATIONS:
+            text = "[shellm] Reached max tool iterations — stopping to prevent infinite loop."
+            history.append({"role": "assistant", "content": text})
+            return text, history
+        iterations += 1
         response = litellm.completion(
             model=model,
             messages=messages,

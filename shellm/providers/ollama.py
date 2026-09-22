@@ -3,11 +3,12 @@
 import urllib.request
 import urllib.error
 import json
+from typing import Optional, List
 
 OLLAMA_BASE = "http://localhost:11434"
 
 
-def detect_ollama() -> dict | None:
+def detect_ollama() -> Optional[dict]:
     """
     Check if Ollama is running locally.
     Returns {"running": True, "models": [...]} or None if not found.
@@ -21,7 +22,7 @@ def detect_ollama() -> dict | None:
         return None
 
 
-def pick_ollama_model(models: list[str]) -> str:
+def pick_ollama_model(models: List[str]) -> str:
     """
     Pick the best available Ollama model.
     Prefers larger/smarter models when multiple are installed.
