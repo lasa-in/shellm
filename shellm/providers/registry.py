@@ -26,14 +26,7 @@ def resolve_model(model_flag: Optional[str]) -> Tuple[str, dict]:
     if model_flag:
         return _apply_env_key(model_flag), {}
 
-    # 1. Ollama auto-detect (free, no config needed)
-    ollama = detect_ollama()
-    if ollama and ollama["models"]:
-        model = pick_ollama_model(ollama["models"])
-        print(f"  🦙 Ollama detected — using \033[32m{model}\033[0m (free, local)\n")
-        return model, {"api_base": ollama["base_url"]}
-
-    # 2. Saved config
+    # 1. Saved config — user's explicit choice beats everything
     cfg = load_config()
     if cfg.get("default_provider") and cfg.get("providers"):
         provider = cfg["default_provider"]
@@ -45,8 +38,15 @@ def resolve_model(model_flag: Optional[str]) -> Tuple[str, dict]:
                 extra["api_key"] = pcfg["api_key"]
             if pcfg.get("api_base"):
                 extra["api_base"] = pcfg["api_base"]
-            print(f"  ⚙  Using configured provider \033[32m{provider}\033[0m → {model}\n")
+            print(f"  ⚙  Using \033[32m{provider}\033[0m → {model}\n")
             return model, extra
+
+    # 2. Ollama auto-detect (free, zero-config fallback)
+    ollama = detect_ollama()
+    if ollama and ollama["models"]:
+        model = pick_ollama_model(ollama["models"])
+        print(f"  🦙 Ollama detected — using \033[32m{model}\033[0m (free, local)\n")
+        return model, {"api_base": ollama["base_url"]}
 
     # 3. Environment variable keys
     if os.environ.get("ANTHROPIC_API_KEY"):
@@ -59,9 +59,9 @@ def resolve_model(model_flag: Optional[str]) -> Tuple[str, dict]:
     # 4. Nothing — guide the user
     raise RuntimeError(
         "\n\033[33mNo model configured.\033[0m Run one of:\n\n"
-        "  shellm configure            → interactive setup wizard\n"
-        "  shellm auth login gemini    → log in with Google (free)\n"
-        "  shellm --model ollama/llama3 (if Ollama is installed)\n\n"
+        "  shellm auth login gemini    → free Gemini key (aistudio.google.com/apikey)\n"
+        "  shellm auth login anthropic → Anthropic API key\n"
+        "  shellm auth login ollama    → use local Ollama models\n\n"
         "Install Ollama free at: https://ollama.ai"
     )
 
