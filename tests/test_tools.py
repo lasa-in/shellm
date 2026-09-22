@@ -1,10 +1,12 @@
 """Unit tests for shellm tools — no LLM or API key required."""
 
 import os
+import sys
 import tempfile
+from unittest.mock import patch, MagicMock
 import pytest
 
-from shellm.tools.bash import run_bash
+from shellm.tools.bash import run_bash, bash_tool, _platform_label
 from shellm.tools.files import read_file, write_file, list_dir
 
 
@@ -35,6 +37,45 @@ class TestBash:
     def test_invalid_command(self):
         result = run_bash("thiscommanddoesnotexist_xyz")
         assert result  # returns something, not empty
+
+    def test_platform_label_mac(self):
+        with patch("shellm.tools.bash._PLATFORM", "darwin"):
+            assert "macOS" in _platform_label()
+
+    def test_platform_label_linux(self):
+        with patch("shellm.tools.bash._PLATFORM", "linux"):
+            assert "Linux" in _platform_label()
+
+    def test_platform_label_windows(self):
+        with patch("shellm.tools.bash._PLATFORM", "win32"):
+            assert "Windows" in _platform_label()
+
+    def test_tool_description_includes_platform(self):
+        desc = bash_tool["function"]["description"]
+        assert any(p in desc for p in ("macOS", "Linux", "Windows"))
+
+    def test_windows_routes_to_powershell(self):
+        """On win32, run_bash should invoke PowerShell, not shell=True."""
+        mock_result = MagicMock()
+        mock_result.stdout = "win output"
+        mock_result.stderr = ""
+        mock_result.returncode = 0
+
+        with patch("shellm.tools.bash._PLATFORM", "win32"), \
+             patch("shellm.tools.bash.subprocess.run", return_value=mock_result) as mock_run:
+            result = run_bash("Get-Location")
+
+        call_args = mock_run.call_args
+        cmd = call_args[0][0]  # first positional arg
+        assert cmd[0] == "powershell"
+        assert "Get-Location" in cmd
+        assert result == "win output"
+
+    def test_powershell_not_found_returns_error(self):
+        with patch("shellm.tools.bash._PLATFORM", "win32"), \
+             patch("shellm.tools.bash.subprocess.run", side_effect=FileNotFoundError):
+            result = run_bash("Get-Location")
+        assert "PowerShell not found" in result
 
 
 # ── file tools ───────────────────────────────────────────────────────────────
