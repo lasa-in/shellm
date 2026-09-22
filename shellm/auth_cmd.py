@@ -52,8 +52,17 @@ def _login(provider: str) -> None:
             set_provider("gemini", PROVIDER_MODELS["gemini"], token=token)
             print("  ✅ Gemini saved to ~/.shellm/config.yaml")
             print("  Run \033[1mshellm\033[0m to start chatting.\n")
-        except GeminiOAuthError as e:
-            print(f"\n\033[31m{e}\033[0m\n")
+        except GeminiOAuthError:
+            # OAuth app not registered — fall back to API key
+            print("\n  Gemini browser login isn't configured yet.")
+            print("  Get a free API key (no credit card) at: \033[4mhttps://aistudio.google.com/apikey\033[0m")
+            key = input("  Paste your Gemini API key: ").strip()
+            if key:
+                set_provider("gemini", PROVIDER_MODELS["gemini"], api_key=key)
+                print("  ✅ Gemini API key saved to ~/.shellm/config.yaml\n")
+                print("  Run \033[1mshellm\033[0m to start chatting.\n")
+            else:
+                print("  No key entered — skipping.\n")
 
     elif provider in ("anthropic", "openai"):
         # API key login — OAuth coming when providers open it
