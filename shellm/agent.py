@@ -41,6 +41,8 @@ def run_agent(prompt: str, model: str, history: list, extra_kwargs: Optional[dic
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
     iterations = 0
     consecutive_unknown = 0
+    last_tool_sig = None   # detect same tool+args repeated back-to-back
+    repeated_count = 0
 
     while True:
         if iterations >= MAX_TOOL_ITERATIONS:
@@ -74,6 +76,18 @@ def run_agent(prompt: str, model: str, history: list, extra_kwargs: Optional[dic
             args = json.loads(tool_call.function.arguments)
 
             print(f"\n⚙  Running tool: \033[33m{name}\033[0m({json.dumps(args, separators=(',', ':'))})")
+
+            # Detect repeated identical tool calls (model stuck in a loop)
+            sig = f"{name}:{json.dumps(args, sort_keys=True)}"
+            if sig == last_tool_sig:
+                repeated_count += 1
+            else:
+                repeated_count = 0
+            last_tool_sig = sig
+            if repeated_count >= 2:
+                text = "I seem to be going in circles. Please try rephrasing, or use a larger model (`ollama pull llama3.1:8b`)."
+                history.append({"role": "assistant", "content": text})
+                return text, history
 
             handler = TOOL_HANDLERS.get(name)
             if handler:
