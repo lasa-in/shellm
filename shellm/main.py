@@ -8,6 +8,35 @@ from .providers import resolve_model
 
 DEFAULT_MODEL = os.environ.get("SHELLM_MODEL", None)  # None = auto-detect
 
+HELP_TEXT = """
+  \033[1mshellm commands\033[0m
+
+  Just type naturally — shellm has access to your shell and files.
+
+  \033[33mBuilt-in commands:\033[0m
+    help                    Show this help
+    exit / quit             Leave shellm
+    auth status             Show configured providers
+    auth login [provider]   Log in (gemini, anthropic, openai, ollama)
+    auth logout [provider]  Remove saved credentials
+
+  \033[33mAvailable tools the AI can use:\033[0m
+    bash          Run any shell command
+    read_file     Read a file's contents
+    write_file    Write or create a file
+    list_dir      List files in a directory
+
+  \033[33mExamples:\033[0m
+    shellm> list all python files changed in the last 7 days
+    shellm> show disk usage for this directory
+    shellm> read my ~/.zshrc and suggest improvements
+    shellm> write a hello world script to /tmp/hello.py
+
+  \033[33mModel flags:\033[0m
+    shellm --model ollama/llama3.1:8b "your prompt"
+    shellm --model claude-sonnet-4-5 "your prompt"
+"""
+
 BANNER = """\033[36m
   ███████╗██╗  ██╗███████╗██╗     ██╗     ███╗   ███╗
   ██╔════╝██║  ██║██╔════╝██║     ██║     ████╗ ████║
@@ -102,6 +131,10 @@ def main():
         if user_input.lower() in ("exit", "quit"):
             print("Bye!")
             break
+
+        if user_input.lower() in ("help", "?", "--help", "-h"):
+            print(HELP_TEXT)
+            continue
 
         # Inline auth command inside REPL: `auth status`, `auth login gemini`
         if user_input.startswith("auth ") or user_input == "auth":
