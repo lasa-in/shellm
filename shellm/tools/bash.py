@@ -55,7 +55,7 @@ bash_tool = {
 }
 
 
-def run_bash(command: str, timeout: int = 30) -> str:
+def run_bash(command: str, timeout=30) -> str:
     """Execute a shell command and return combined stdout + stderr.
 
     Routes to the correct shell for the current OS:
@@ -63,6 +63,7 @@ def run_bash(command: str, timeout: int = 30) -> str:
       - Mac/Linux → shell=True (bash)
     """
     try:
+        timeout = int(timeout)  # model may pass "30" as string
         if _PLATFORM == "win32":
             proc_args = ["powershell", "-NoProfile", "-NonInteractive", "-Command", command]
             result = subprocess.run(
