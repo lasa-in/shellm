@@ -1,6 +1,7 @@
 """Agent loop — sends messages to the LLM and handles tool calls."""
 
 import json
+from typing import Optional
 import litellm
 from .tools import ALL_TOOLS, run_bash, read_file, write_file, list_dir
 
@@ -18,7 +19,7 @@ Always show the command you're about to run before executing it.
 Ask for confirmation before deleting files or making irreversible changes."""
 
 
-def run_agent(prompt: str, model: str, history: list, extra_kwargs: dict | None = None) -> tuple[str, list]:
+def run_agent(prompt: str, model: str, history: list, extra_kwargs: Optional[dict] = None) -> tuple:
     """
     Run one turn of the agent loop.
     Returns the final text response and updated history.
