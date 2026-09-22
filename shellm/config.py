@@ -1,6 +1,7 @@
 """shellm config — read/write ~/.shellm/config.yaml."""
 
 import os
+from typing import Optional
 import yaml  # via litellm's dep tree; or add pyyaml explicitly
 
 CONFIG_DIR  = os.path.expanduser("~/.shellm")
@@ -21,8 +22,8 @@ def save_config(cfg: dict) -> None:
     os.chmod(CONFIG_FILE, 0o600)  # user-only read/write
 
 
-def set_provider(provider: str, model: str, api_key: str | None = None,
-                 api_base: str | None = None, token: dict | None = None) -> None:
+def set_provider(provider: str, model: str, api_key: Optional[str] = None,
+                 api_base: Optional[str] = None, token: Optional[dict] = None) -> None:
     cfg = load_config()
     cfg.setdefault("providers", {})[provider] = {
         k: v for k, v in {
@@ -36,7 +37,7 @@ def set_provider(provider: str, model: str, api_key: str | None = None,
     save_config(cfg)
 
 
-def get_provider_token(provider: str) -> dict | None:
+def get_provider_token(provider: str) -> Optional[dict]:
     cfg = load_config()
     return cfg.get("providers", {}).get(provider, {}).get("token")
 
