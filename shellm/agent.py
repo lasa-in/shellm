@@ -18,12 +18,13 @@ Always show the command you're about to run before executing it.
 Ask for confirmation before deleting files or making irreversible changes."""
 
 
-def run_agent(prompt: str, model: str, history: list) -> tuple[str, list]:
+def run_agent(prompt: str, model: str, history: list, extra_kwargs: dict | None = None) -> tuple[str, list]:
     """
     Run one turn of the agent loop.
     Returns the final text response and updated history.
     """
     history.append({"role": "user", "content": prompt})
+    extra_kwargs = extra_kwargs or {}
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
 
@@ -33,6 +34,7 @@ def run_agent(prompt: str, model: str, history: list) -> tuple[str, list]:
             messages=messages,
             tools=ALL_TOOLS,
             tool_choice="auto",
+            **extra_kwargs,
         )
 
         message = response.choices[0].message
