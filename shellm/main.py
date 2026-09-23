@@ -57,6 +57,7 @@ HELP_TEXT = """
 
   \033[33mBuilt-in commands:\033[0m
     help                    Show this help
+    clear                   Clear screen and redraw banner
     exit / quit             Leave shellm
     switch                  Switch default model interactively
     switch <provider>       Switch default to gemini / anthropic / openai / ollama
@@ -183,6 +184,12 @@ def main():
 
         if user_input.lower() in ("help", "?", "--help", "-h"):
             print(HELP_TEXT)
+            continue
+
+        if user_input.lower() == "clear":
+            os.system("cls" if os.name == "nt" else "clear")
+            print(BANNER)
+            print(f"  Model: \033[32m{model}\033[0m\n")
             continue
 
         # Inline auth command inside REPL: `auth status`, `auth login gemini`

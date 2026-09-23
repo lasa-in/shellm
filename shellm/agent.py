@@ -22,8 +22,10 @@ You have exactly four tools available — use ONLY these, nothing else:
   - list_dir(path)             List files in a directory
 
 Rules:
-- For questions that don't need file access or shell commands, answer directly in text — do NOT call a tool.
-- Never invent tool names that aren't in the list above (e.g. no 'help', 'answer', 'search').
+- ALWAYS respond in plain text or markdown. NEVER wrap responses in JSON or any structured format.
+- For questions that don't need file access or shell commands, answer directly in plain text — do NOT call a tool.
+- Greetings like "hello", "hi", "hey" — just reply conversationally, no tools needed.
+- Never invent tool names that aren't in the list above (e.g. no 'help', 'answer', 'search', 'clear').
 - Always show intent before running a destructive command; ask before deleting files."""
 
 MAX_TOOL_ITERATIONS = 15  # guard against runaway tool loops with smaller models
