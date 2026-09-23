@@ -2,7 +2,11 @@
 
 import sys
 import os
+import warnings
 import argparse
+
+# Suppress LiteLLM/Pydantic serialization warnings from Gemini tool call format
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 from .agent import run_agent
 from .providers import resolve_model
 
