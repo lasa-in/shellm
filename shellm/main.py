@@ -8,8 +8,45 @@ import argparse
 
 # Suppress LiteLLM/Pydantic serialization warnings from Gemini tool call format
 warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.styles import Style
+from prompt_toolkit.history import InMemoryHistory
+
 from .agent import run_agent
 from .providers import resolve_model
+
+
+# ── prompt_toolkit styling ────────────────────────────────────────────────────
+_PT_STYLE = Style.from_dict({
+    "sep":    "#00cccc",   # cyan separator lines
+    "prompt": "bold",      # shellm> text
+    "bottom-toolbar": "#00cccc bg:default",
+})
+
+
+def _make_prompt_text() -> FormattedText:
+    """Top separator + prompt label, rendered by prompt_toolkit."""
+    width = shutil.get_terminal_size().columns
+    return FormattedText([
+        ("class:sep", "─" * width + "\n"),
+        ("class:prompt", "shellm> "),
+    ])
+
+
+def _bottom_toolbar() -> FormattedText:
+    """Bottom separator line — stays pinned at the bottom of the terminal."""
+    width = shutil.get_terminal_size().columns
+    return FormattedText([("class:bottom-toolbar", "─" * width)])
+
+
+_SESSION = PromptSession(
+    history=InMemoryHistory(),
+    bottom_toolbar=_bottom_toolbar,
+    style=_PT_STYLE,
+    refresh_interval=0,   # no polling — toolbar redraws on each prompt
+)
 
 DEFAULT_MODEL = os.environ.get("SHELLM_MODEL", None)  # None = auto-detect
 
@@ -130,12 +167,10 @@ def main():
 
     while True:
         try:
-            width = shutil.get_terminal_size().columns
-            sep = f"\033[36m{'─' * width}\033[0m"
-            print(sep)
-            user_input = input("\033[1mshellm>\033[0m ").strip()
-            print(sep)
-        except (KeyboardInterrupt, EOFError):
+            user_input = _SESSION.prompt(_make_prompt_text).strip()
+        except KeyboardInterrupt:
+            continue   # Ctrl-C clears current line, stays in REPL
+        except EOFError:
             print("\nBye!")
             break
 
