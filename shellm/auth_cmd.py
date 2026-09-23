@@ -14,7 +14,7 @@ from .providers.gemini_oauth import login as gemini_login, revoke as gemini_revo
 
 
 PROVIDER_MODELS = {
-    "gemini":    "gemini/gemini-1.5-flash",
+    "gemini":    "gemini/gemini-2.0-flash",
     "anthropic": "claude-sonnet-4-5",
     "openai":    "gpt-4o",
     "ollama":    "ollama/llama3",
