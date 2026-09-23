@@ -54,7 +54,7 @@ def resolve_model(model_flag: Optional[str]) -> Tuple[str, dict]:
     if os.environ.get("OPENAI_API_KEY"):
         return "gpt-4o", {}
     if os.environ.get("GEMINI_API_KEY"):
-        return "gemini/gemini-2.0-flash", {}
+        return "gemini/gemini-3.6-flash", {}
 
     # 4. Nothing — guide the user
     raise RuntimeError(
