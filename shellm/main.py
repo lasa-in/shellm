@@ -20,6 +20,8 @@ HELP_TEXT = """
   \033[33mBuilt-in commands:\033[0m
     help                    Show this help
     exit / quit             Leave shellm
+    switch                  Switch default model interactively
+    switch <provider>       Switch default to gemini / anthropic / openai / ollama
     auth status             Show configured providers
     auth login [provider]   Log in (gemini, anthropic, openai, ollama)
     auth logout [provider]  Remove saved credentials
@@ -91,12 +93,15 @@ def main():
         print(f"shellm {__version__}")
         sys.exit(0)
 
-    # ── `shellm auth ...` subcommand ─────────────────────────────────────────
-    # Handles: shellm auth login gemini / shellm auth status / shellm auth logout
+    # ── `shellm auth ...` / `shellm switch ...` subcommands ─────────────────
     all_positional = ([args.prompt] if args.prompt else []) + list(args.auth_args or [])
     if all_positional and all_positional[0] == "auth":
         from .auth_cmd import cmd_auth
         cmd_auth(all_positional[1:])
+        return
+    if all_positional and all_positional[0] == "switch":
+        from .switch_cmd import cmd_switch
+        cmd_switch(all_positional[1:])
         return
 
     # ── Resolve model (auto-detect Ollama → config → env vars) ──────────────
@@ -144,6 +149,12 @@ def main():
         if user_input.startswith("auth ") or user_input == "auth":
             from .auth_cmd import cmd_auth
             cmd_auth(user_input.split()[1:])
+            continue
+
+        # Inline switch inside REPL: `switch`, `switch gemini`
+        if user_input.startswith("switch") :
+            from .switch_cmd import cmd_switch
+            cmd_switch(user_input.split()[1:])
             continue
 
         try:
