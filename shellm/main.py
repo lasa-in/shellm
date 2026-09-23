@@ -51,7 +51,7 @@ BANNER = """\033[36m
   ███████║██║  ██║███████╗███████╗███████╗██║ ╚═╝ ██║
   ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝
 \033[0m  Terminal AI assistant — model-agnostic, open-source
-  Type \033[33mexit\033[0m or \033[33mquit\033[0m to leave  |  \033[33mshellm auth status\033[0m to see providers
+  Type \033[33mexit\033[0m or \033[33mquit\033[0m to leave  |  \033[33mauth status\033[0m to see providers  |  \033[33mswitch\033[0m to change model
 """
 
 
