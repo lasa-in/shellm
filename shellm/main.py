@@ -2,6 +2,7 @@
 
 import sys
 import os
+import shutil
 import warnings
 import argparse
 
@@ -129,7 +130,11 @@ def main():
 
     while True:
         try:
+            width = shutil.get_terminal_size().columns
+            sep = f"\033[36m{'─' * width}\033[0m"
+            print(sep)
             user_input = input("\033[1mshellm>\033[0m ").strip()
+            print(sep)
         except (KeyboardInterrupt, EOFError):
             print("\nBye!")
             break
